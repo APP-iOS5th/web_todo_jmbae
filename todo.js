@@ -9,7 +9,6 @@ function clickAddButton() {
     const todoObject = saveNewTodo(value)
 		addTodo(todoObject)
 		document.getElementById("todoInput").value = ""
-		// storeTodos()
 	}
 }
 
@@ -28,7 +27,6 @@ document.getElementById("addTodo").addEventListener("click", clickAddButton)
 
 // 화면을 그려주는 함수
 function addTodo(todoObject) {
-
   const todoText = todoObject.text
   const todoDone = todoObject.done
   const todoDate = todoObject.date
@@ -38,11 +36,12 @@ function addTodo(todoObject) {
 	var list = document.getElementById("todoList")
 
 	var item = document.createElement("li")
+  item.id = todoDate
+
 	var spanElement = document.createElement("span")
 	spanElement.classList.add("px-2")
 	spanElement.innerText = todoText
 
-	item.appendChild(spanElement)
 
 	item.classList.add("list-group-item")
 
@@ -53,24 +52,26 @@ function addTodo(todoObject) {
 	completeButton.classList.add("btn", "btn-dark", "btn-sm", "float-end")
 	completeButton.addEventListener("click", function () {
     toggleTodo(todoObject)
+    loadTodos()
 	})
 
   if(todoDone) {
-    item.style.setProperty("text-decoration", "line-through")
+    spanElement.style.setProperty("text-decoration", "line-through")
   } else {
-    item.style.removeProperty("text-decoration")
+    spanElement.style.removeProperty("text-decoration")
   }
 
 	removeButton.innerText = "Remove"
 	removeButton.classList.add("btn", "btn-danger", "btn-sm", "float-end")
 	removeButton.addEventListener("click", function () {
-		item.parentNode.removeChild(item)
-		storeTodos()
+    deleteTodo(todoObject)
+    loadTodos()
 	})
 
-	item.appendChild(completeButton)
-	item.appendChild(removeButton)
-	list.appendChild(item)
+  item.appendChild(spanElement)
+  item.appendChild(completeButton)
+  item.appendChild(removeButton)  
+  list.appendChild(item)
 }
 
 function saveNewTodo(value) {
@@ -85,33 +86,33 @@ function toggleTodo(todoObject) {
   updateTodo({...todoObject, done: !todoObject.done})
 }
 
+function deleteTodo(todoDeleteObject) {
+  const todos = JSON.parse(localStorage.getItem("todos")) || []
+  const newTodos = [];
+  todos.forEach((todoObject) => {
+    if(todoObject.date !== todoDeleteObject.date) {
+      newTodos.push(todoObject)
+    }
+  });
+  localStorage.setItem("todos", JSON.stringify(newTodos))
+}
 
 function updateTodo(todoUpdateObject) {
   const todos = JSON.parse(localStorage.getItem("todos")) || []
   todos.forEach((todoObject) => {
     if(todoObject.date === todoUpdateObject.date) {
-      console.log('비교 정상!')
       todoObject.done = todoUpdateObject.done
     }
   });
   localStorage.setItem("todos", JSON.stringify(todos))
 }
 
-
-
-// 리스트에 저장하는 함수
-function storeTodos() {
-	var todos = []
-	for (var i = 0; i < todoList.children.length; i++) {
-		todos.push(todoList.children[i].querySelector("span").textContent.trim())
-	}
-	localStorage.setItem("todos", JSON.stringify(todos))
-}
-
 // 새로 로딩하는 함수
 function loadTodos() {
 	var todos = JSON.parse(localStorage.getItem("todos"))
 	if (todos) {
+    var list = document.getElementById("todoList")
+    list.innerHTML = ''
 		todos.forEach(function (todo) {
 			addTodo(todo)
 		})
