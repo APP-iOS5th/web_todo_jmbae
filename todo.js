@@ -110,11 +110,15 @@ function updateTodo(todoUpdateObject) {
 // 새로 로딩하는 함수
 function loadTodos() {
 	var todos = JSON.parse(localStorage.getItem("todos"))
+  let count = 0;
 	if (todos) {
     var list = document.getElementById("todoList")
     list.innerHTML = ''
 		todos.forEach(function (todo) {
+      if(todo.done) count++;
 			addTodo(todo)
 		})
 	}
+  document.getElementById('remainsCount').textContent = todos.length - count;
+  document.getElementById('doneCount').textContent = count;
 }
