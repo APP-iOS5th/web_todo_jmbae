@@ -6,9 +6,10 @@ document.addEventListener("DOMContentLoaded", function () {
 function clickAddButton() {
 	var value = document.getElementById("todoInput").value
 	if (value) {
-		addTodo(value)
+    const todoObject = saveNewTodo(value)
+		addTodo(todoObject)
 		document.getElementById("todoInput").value = ""
-		storeTodos()
+		// storeTodos()
 	}
 }
 
@@ -26,13 +27,20 @@ document
 document.getElementById("addTodo").addEventListener("click", clickAddButton)
 
 // 화면을 그려주는 함수
-function addTodo(text) {
+function addTodo(todoObject) {
+
+  const todoText = todoObject.text
+  const todoDone = todoObject.done
+  const todoDate = todoObject.date
+
+  console.log(todoDate)
+
 	var list = document.getElementById("todoList")
 
 	var item = document.createElement("li")
 	var spanElement = document.createElement("span")
 	spanElement.classList.add("px-2")
-	spanElement.innerText = text
+	spanElement.innerText = todoText
 
 	item.appendChild(spanElement)
 
@@ -44,8 +52,14 @@ function addTodo(text) {
 	completeButton.innerText = "Complete"
 	completeButton.classList.add("btn", "btn-dark", "btn-sm", "float-end")
 	completeButton.addEventListener("click", function () {
-		item.style.setProperty("text-decoration", "line-through")
+    toggleTodo(todoObject)
 	})
+
+  if(todoDone) {
+    item.style.setProperty("text-decoration", "line-through")
+  } else {
+    item.style.removeProperty("text-decoration")
+  }
 
 	removeButton.innerText = "Remove"
 	removeButton.classList.add("btn", "btn-danger", "btn-sm", "float-end")
@@ -58,6 +72,32 @@ function addTodo(text) {
 	item.appendChild(removeButton)
 	list.appendChild(item)
 }
+
+function saveNewTodo(value) {
+  const todoObject = {text: value, done: false, date: new Date()}
+  const todos = JSON.parse(localStorage.getItem("todos")) || []
+  todos.push(todoObject);
+  localStorage.setItem("todos", JSON.stringify(todos))
+  return todoObject
+}
+
+function toggleTodo(todoObject) {
+  updateTodo({...todoObject, done: !todoObject.done})
+}
+
+
+function updateTodo(todoUpdateObject) {
+  const todos = JSON.parse(localStorage.getItem("todos")) || []
+  todos.forEach((todoObject) => {
+    if(todoObject.date === todoUpdateObject.date) {
+      console.log('비교 정상!')
+      todoObject.done = todoUpdateObject.done
+    }
+  });
+  localStorage.setItem("todos", JSON.stringify(todos))
+}
+
+
 
 // 리스트에 저장하는 함수
 function storeTodos() {
